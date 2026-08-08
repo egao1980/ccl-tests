@@ -16,10 +16,18 @@
     (when ccl
       (load "ccl.lsp"))))
 
+(defun clear-ansi-scratch ()
+  "ENSURE-DIRECTORIES-EXIST.8 asserts scratch/ is absent; make clean removes it,
+but skip/fail of make must not leave a dirty tree."
+  (when (probe-file "scratch/")
+    (ccl:run-program "/bin/rm" '("-rf" "scratch") :output nil :error nil :wait t))
+  (probe-file "scratch/"))
+
 (defun run-tests (&key verbose (compile t) exit (ansi t) (ccl t))
   (load-tests :ansi ansi :ccl ccl)
   (ccl:cwd "tests:ansi-tests;")
-  (ccl:run-program "make" '("clean"))
+  (ccl:run-program "make" '("clean") :output nil :error nil :wait t)
+  (clear-ansi-scratch)
   (let ((do-tests (find-symbol "DO-TESTS" "RT"))
 	(failed (find-symbol "*FAILED-TESTS*" "RT")))
     (time (funcall do-tests :compile compile :verbose verbose :catch-errors t))

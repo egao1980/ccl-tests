@@ -187,11 +187,14 @@
 
 
 (deftest ccl.40055-3
+    ;; Qualify ccl:require-type — CL-TEST does not use the CCL package, so a
+    ;; bare REQUIRE-TYPE is read as CL-TEST::REQUIRE-TYPE and only yields an
+    ;; UNDEFINED-FUNCTION-REFERENCE (see ccl.bug#286 which already uses ccl:).
     (let ((file (test-source-file "
  (defclass ccl.40055-3-class () ())
- (defun ccl.40055-3-cfn () (require-type nil '(or ccl.40055-3-class null)))
+ (defun ccl.40055-3-cfn () (ccl:require-type nil '(or ccl.40055-3-class null)))
  (defstruct ccl.40055-3-struct)
- (defun ccl.40055-3-rfn () (require-type nil '(or ccl.40055-3-struct null)))")))
+ (defun ccl.40055-3-rfn () (ccl:require-type nil '(or ccl.40055-3-struct null)))")))
       (handler-case
           (progn (test-compile file :break-on-program-errors nil) :no-warnings)
         (warning (c) c)))
