@@ -906,11 +906,15 @@
   ())
 
 (defun test-compiler-warning (text &key (safety 1))
+  ;; :override t so LOAD's enclosing WITH-COMPILATION-UNIT does not swallow
+  ;; compile-file deferred warnings (:undefined-type / :undefined-function /
+  ;; :environment-mismatch) before this handler-bind can see them.
   (let ((warnings nil))
     (handler-bind ((ccl::compiler-warning (lambda (c)
 					    (push (ccl::compiler-warning-warning-type c) warnings)
 					    (muffle-warning c))))
-      (test-compile (test-source-file "~a" text) :hide-warnings t :break-on-program-errors nil :safety safety))
+      (with-compilation-unit (:override t)
+        (test-compile (test-source-file "~a" text) :hide-warnings t :break-on-program-errors nil :safety safety)))
     (nreverse warnings)))
   
 (deftest ccl.49345-u1
