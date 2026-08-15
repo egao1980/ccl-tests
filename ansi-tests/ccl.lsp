@@ -187,11 +187,14 @@
 
 
 (deftest ccl.40055-3
+    ;; Qualify ccl:require-type — CL-TEST does not use the CCL package, so a
+    ;; bare REQUIRE-TYPE is read as CL-TEST::REQUIRE-TYPE and only yields an
+    ;; UNDEFINED-FUNCTION-REFERENCE (see ccl.bug#286 which already uses ccl:).
     (let ((file (test-source-file "
  (defclass ccl.40055-3-class () ())
- (defun ccl.40055-3-cfn () (require-type nil '(or ccl.40055-3-class null)))
+ (defun ccl.40055-3-cfn () (ccl:require-type nil '(or ccl.40055-3-class null)))
  (defstruct ccl.40055-3-struct)
- (defun ccl.40055-3-rfn () (require-type nil '(or ccl.40055-3-struct null)))")))
+ (defun ccl.40055-3-rfn () (ccl:require-type nil '(or ccl.40055-3-struct null)))")))
       (handler-case
           (progn (test-compile file :break-on-program-errors nil) :no-warnings)
         (warning (c) c)))
@@ -903,11 +906,15 @@
   ())
 
 (defun test-compiler-warning (text &key (safety 1))
+  ;; :override t so LOAD's enclosing WITH-COMPILATION-UNIT does not swallow
+  ;; compile-file deferred warnings (:undefined-type / :undefined-function /
+  ;; :environment-mismatch) before this handler-bind can see them.
   (let ((warnings nil))
     (handler-bind ((ccl::compiler-warning (lambda (c)
 					    (push (ccl::compiler-warning-warning-type c) warnings)
 					    (muffle-warning c))))
-      (test-compile (test-source-file "~a" text) :hide-warnings t :break-on-program-errors nil :safety safety))
+      (with-compilation-unit (:override t)
+        (test-compile (test-source-file "~a" text) :hide-warnings t :break-on-program-errors nil :safety safety)))
     (nreverse warnings)))
   
 (deftest ccl.49345-u1
