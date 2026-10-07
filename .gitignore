@@ -1,0 +1,24 @@
+# Compiled files (CCL per-platform fasls and generic)
+*.dx64fsl
+*.dx32fsl
+*.da64fsl
+*.lx64fsl
+*.lx32fsl
+*.la64fsl
+*.wx64fsl
+*.wx32fsl
+*.fasl
+*.ufsl
+
+# Scratch output written by the ANSI suite while running
+ansi-tests/scratch/
+ansi-tests/a*x/
+ansi-tests/*.dat
+ansi-tests/*.DAT
+ansi-tests/*.OUT
+ansi-tests/COMPILE-FILE-TEST-LP.LSP
+ansi-tests/LDTEST.LSP
+ansi-tests/file-that-was-renamed.txt
+ansi-tests/foo.*
+ansi-tests/tmp.txt
+.DS_Store
